@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -18,18 +19,15 @@ import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
 import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeView;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -38,13 +36,11 @@ public class ModuleGraphController {
     private final XmlMapper mapper;
     private final String PREFERENCE_NODE_NAME = "com.coderscratchpad.javafx.preferences";
     private final Preferences preferences = Preferences.userRoot().node(PREFERENCE_NODE_NAME);
-//    private final Node folderIcon = new ImageView(
-//        new Image(getClass().getResourceAsStream("folder_16.png"))
-//    );
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
     private Graph<ModuleDefinition, DefaultEdge> graph;
+    private ArrayDeque<String> backStack = new ArrayDeque<>();
 
     @FXML
     private Label moduleName;
@@ -56,7 +52,6 @@ public class ModuleGraphController {
     private ListView<String> resourceList;
     @FXML
     private TableView<ModuleDependency> dependencyTable;
-
     @FXML
     private TableColumn<ModuleDependency, String> moduleNameColumn;
     @FXML
@@ -65,9 +60,10 @@ public class ModuleGraphController {
     private TableColumn<ModuleDependency, String> moduleServicesColumn;
     @FXML
     private TableColumn<ModuleDependency, String> moduleOptionalColumn;
-
     @FXML
     private TreeView<ModuleDefinition> moduleTree;
+    @FXML
+    private TextField moduleFilter;
 
     public ModuleGraphController() {
         mapper = new XmlMapper();
@@ -93,7 +89,61 @@ public class ModuleGraphController {
     }
 
     @FXML
+    private void openModuleRoot(ActionEvent event) {
+        DirectoryChooser chooser = new DirectoryChooser();
+
+        chooser.setTitle("Open Module Root");
+        if (moduleRoot != null) {
+            chooser.setInitialDirectory(moduleRoot);
+        }
+
+        File selectedDir = chooser.showDialog(moduleName.getScene().getWindow());
+        if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
+            moduleRoot = selectedDir;
+            preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
+            populateTree();
+        }
+    }
+
+    @FXML
     private void onModuleClicked(MouseEvent event) {
+        var moduleDef = moduleTree.getSelectionModel().getSelectedItem().getValue();
+        pushModuleToBackStack(moduleDef);
+        populateMetadata();
+    }
+
+    private void pushModuleToBackStack(ModuleDefinition moduleDef) {
+        if (!Objects.equals(backStack.peek(), moduleDef.name)) {
+            backStack.push(moduleDef.name);
+        }
+    }
+
+    @FXML
+    private void onDependencyClicked(MouseEvent event) {
+        pushModuleToBackStack(moduleTree.getSelectionModel().getSelectedItem().getValue());
+        navigateToModule(dependencyTable.getSelectionModel().getSelectedItem().name);
+    }
+
+    @FXML
+    private void onBackClicked(MouseEvent event) {
+        if (!backStack.isEmpty()) {
+            var current = moduleTree.getSelectionModel().getSelectedItem().getValue().name;
+            var back = backStack.pop();
+            while(!backStack.isEmpty() && Objects.equals(current, back)) {
+                back = backStack.pop();
+            }
+            navigateToModule(back);
+        }
+    }
+
+    @FXML
+    private void onModuleFilterChanged(KeyEvent event) {
+        moduleFilter.textProperty().addListener((obs, oldText, newText) -> {
+            populateTree();
+        });
+    }
+
+    private void populateMetadata() {
         var moduleDef = moduleTree.getSelectionModel().getSelectedItem().getValue();
         moduleName.setText(moduleDef.getName());
         moduleVersion.setText(moduleDef.version);
@@ -103,49 +153,13 @@ public class ModuleGraphController {
         populateDependencyTable(moduleDef);
     }
 
-    @FXML
-    private void onDependencyClicked(MouseEvent event) {
-        var moduleDef = dependencyTable.getSelectionModel().getSelectedItem();
+    private void navigateToModule(String moduleDef) {
         moduleTree.getRoot().getChildren().stream()
-            .filter(item -> item.getValue().name.equals(moduleDef.name))
+            .filter(item -> item.getValue().name.equals(moduleDef))
             .findFirst()
             .ifPresent(item -> moduleTree.getSelectionModel().select(item));
         moduleTree.scrollTo(moduleTree.getSelectionModel().getSelectedIndex());
-        onModuleClicked(event);
-    }
-
-    @FXML
-    private void openModuleRoot(ActionEvent event) {
-        DirectoryChooser chooser = new DirectoryChooser();
-
-        // Set title for the file dialog
-        chooser.setTitle("Open Module Root");
-        if (moduleRoot != null) {
-            chooser.setInitialDirectory(moduleRoot);
-        }
-
-        // Show the file dialog and get the selected file
-        File selectedDir = chooser.showDialog(moduleName.getScene().getWindow());
-
-        if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
-            moduleRoot = selectedDir;
-            preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
-            populateTree();
-        }
-
-/*
-        var dialog = new TextInputDialog();
-        dialog.setTitle("Open Module Root");
-        dialog.setHeaderText("Enter some text, or use default value.");
-
-        Optional<String> result = dialog.showAndWait();
-
-        if (result.isPresent()) {
-            moduleRoot = result.get();
-            preferences.put("moduleRoot", moduleRoot);
-            populateTree();
-        }
-*/
+        populateMetadata();
     }
 
     private void populateTree() {
