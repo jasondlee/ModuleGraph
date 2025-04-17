@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -40,7 +41,8 @@ public class ModuleGraphController {
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
     private Graph<ModuleDefinition, DefaultEdge> graph;
-    private ArrayDeque<String> backStack = new ArrayDeque<>();
+    private final ArrayDeque<String> backStack = new ArrayDeque<>();
+    private String moduleFilter;
 
     @FXML
     private Label moduleName;
@@ -63,7 +65,7 @@ public class ModuleGraphController {
     @FXML
     private TreeView<ModuleDefinition> moduleTree;
     @FXML
-    private TextField moduleFilter;
+    private TextField moduleFilterTextField;
 
     public ModuleGraphController() {
         mapper = new XmlMapper();
@@ -79,11 +81,17 @@ public class ModuleGraphController {
         moduleServicesColumn.setCellValueFactory(new ModuleDefinitionValueFactory("services"));
         moduleOptionalColumn.setCellValueFactory(new ModuleDefinitionValueFactory("optional"));
 
+        moduleFilterTextField.textProperty().addListener((obs, oldText, newText) -> {
+            moduleFilter = newText;
+            populateTree();
+        });
+
         String moduleDir = preferences.get("moduleRoot", null);
         if (moduleDir == null) {
             openModuleRoot(null);
         } else {
             moduleRoot = new File(moduleDir);
+            getModules();
             populateTree();
         }
     }
@@ -101,6 +109,7 @@ public class ModuleGraphController {
         if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
             moduleRoot = selectedDir;
             preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
+            getModules();
             populateTree();
         }
     }
@@ -136,13 +145,6 @@ public class ModuleGraphController {
         }
     }
 
-    @FXML
-    private void onModuleFilterChanged(KeyEvent event) {
-        moduleFilter.textProperty().addListener((obs, oldText, newText) -> {
-            populateTree();
-        });
-    }
-
     private void populateMetadata() {
         var moduleDef = moduleTree.getSelectionModel().getSelectedItem().getValue();
         moduleName.setText(moduleDef.getName());
@@ -163,15 +165,18 @@ public class ModuleGraphController {
     }
 
     private void populateTree() {
-        getModules();
-        graph = createGraph();
-
         var root = new ModuleDefinitionTreeItem(new ModuleDefinition("root"));
 
         modules.values().stream()
+            .filter(module -> {
+                if (moduleFilter != null && !modules.isEmpty()) {
+                    return module.name.toLowerCase(Locale.ROOT).contains(moduleFilter.toLowerCase(Locale.ROOT));
+                } else {
+                    return true;
+                }
+            })
             .sorted()
             .forEach(module -> root.getChildren().add(new ModuleDefinitionTreeItem(module)));
-
 
         moduleTree.setRoot(root);
     }
@@ -210,6 +215,7 @@ public class ModuleGraphController {
         } catch (IOException e) {
             modules =  new LinkedHashMap<>();
         }
+        graph = createGraph();
     }
 
     private Graph<ModuleDefinition, DefaultEdge> createGraph() {
