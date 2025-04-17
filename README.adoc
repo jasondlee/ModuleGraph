@@ -1,6 +1,6 @@
 = WildFly Module Analyzer
 
-This is (so far) a fairly simple JavaFX application intended to help visualize and analyze WildFly's module graph. Currently features include:
+This is (so far) a fairly simple JavaFX application intended to help visualize and analyze WildFly's module graph. Current features include:
 
 * Scan the provided module root directory
 * Display a list of all modules found
@@ -8,6 +8,10 @@ This is (so far) a fairly simple JavaFX application intended to help visualize a
 * Clicking on a dependency navigates to that module
 * The module list can be filtered using the text area in the top left of the application
 * A back button allows the user to return to previously selected modules
+
+To run the application:
+
+`$ mvn package javafx:run`
 
 Future plans include:
 
