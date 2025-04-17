@@ -1,0 +1,17 @@
+= WildFly Module Analyzer
+
+This is (so far) a fairly simple JavaFX application intended to help visualize and analyze WildFly's module graph. Currently features include:
+
+* Scan the provided module root directory
+* Display a list of all modules found
+* When a module is selected, its metadata (e.g., artifacts provided and dependencies) is displayed
+* Clicking on a dependency navigates to that module
+* The module list can be filtered using the text area in the top left of the application
+* A back button allows the user to return to previously selected modules
+
+Future plans include:
+
+* A visual graph of a module's dependencies
+* Identifying modules with no dependents
+
+This is a small side project to address a recurring need of mine over the past few years of doing WildFly work, so it's tailored to my needs. I am, however, open to suggestions (and pull requests! ;) if there is something you would like to see added. Additionally, while this does say "WildFly", any system using JBoss Modules can benefit from this.
