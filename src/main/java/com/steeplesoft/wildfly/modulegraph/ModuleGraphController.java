@@ -35,8 +35,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class ModuleGraphController {
     private final XmlMapper mapper;
-    private final String PREFERENCE_NODE_NAME = "com.coderscratchpad.javafx.preferences";
-    private final Preferences preferences = Preferences.userRoot().node(PREFERENCE_NODE_NAME);
+    private final Preferences preferences = Preferences.userRoot().node("com/steeplesoft/wildfly/modulegraph");
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
@@ -87,9 +86,7 @@ public class ModuleGraphController {
         });
 
         String moduleDir = preferences.get("moduleRoot", null);
-        if (moduleDir == null) {
-            openModuleRoot(null);
-        } else {
+        if (moduleDir != null) {
             moduleRoot = new File(moduleDir);
             getModules();
             populateTree();
@@ -105,7 +102,7 @@ public class ModuleGraphController {
             chooser.setInitialDirectory(moduleRoot);
         }
 
-        File selectedDir = chooser.showDialog(moduleName.getScene().getWindow());
+        File selectedDir = chooser.showDialog(moduleTree.getScene().getWindow());
         if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
             moduleRoot = selectedDir;
             preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
