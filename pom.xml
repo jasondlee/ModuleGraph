@@ -19,6 +19,21 @@
         <version.jgrapht>1.5.2</version.jgrapht>
     </properties>
 
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://spdx.org/licenses/Apache-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jasondlee</id>
+            <name>Jason Lee</name>
+        </developer>
+    </developers>
+
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
