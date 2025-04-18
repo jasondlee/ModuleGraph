@@ -26,7 +26,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeView;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import org.jgrapht.Graph;
@@ -39,7 +39,7 @@ public class ModuleGraphController {
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
-    private Graph<ModuleDefinition, DefaultEdge> graph;
+    private Graph<ModuleDefinition, DependencyEdge> graph;
     private final ArrayDeque<String> backStack = new ArrayDeque<>();
     private String moduleFilter;
 
@@ -53,6 +53,8 @@ public class ModuleGraphController {
     private ListView<String> resourceList;
     @FXML
     private TableView<ModuleDependency> dependencyTable;
+    @FXML
+    private ListView<String> dependentList;
     @FXML
     private TableColumn<ModuleDependency, String> moduleNameColumn;
     @FXML
@@ -126,8 +128,18 @@ public class ModuleGraphController {
 
     @FXML
     private void onDependencyClicked(MouseEvent event) {
-        pushModuleToBackStack(moduleTree.getSelectionModel().getSelectedItem().getValue());
-        navigateToModule(dependencyTable.getSelectionModel().getSelectedItem().name);
+        if (event.getButton().equals(MouseButton.PRIMARY)) {
+            pushModuleToBackStack(moduleTree.getSelectionModel().getSelectedItem().getValue());
+            navigateToModule(dependencyTable.getSelectionModel().getSelectedItem().name);
+        }
+    }
+
+    @FXML
+    private void onDependentClicked(MouseEvent event) {
+        if (event.getButton().equals(MouseButton.PRIMARY)) {
+            pushModuleToBackStack(moduleTree.getSelectionModel().getSelectedItem().getValue());
+            navigateToModule(dependentList.getSelectionModel().getSelectedItem());
+        }
     }
 
     @FXML
@@ -135,7 +147,7 @@ public class ModuleGraphController {
         if (!backStack.isEmpty()) {
             var current = moduleTree.getSelectionModel().getSelectedItem().getValue().name;
             var back = backStack.pop();
-            while(!backStack.isEmpty() && Objects.equals(current, back)) {
+            while (!backStack.isEmpty() && Objects.equals(current, back)) {
                 back = backStack.pop();
             }
             navigateToModule(back);
@@ -150,6 +162,7 @@ public class ModuleGraphController {
 
         populateResourceList(moduleDef);
         populateDependencyTable(moduleDef);
+        populateDependentsList(moduleDef);
     }
 
     private void navigateToModule(String moduleDef) {
@@ -196,6 +209,15 @@ public class ModuleGraphController {
         moduleDef.dependencies.forEach(dep -> dependencyTable.getItems().add(dep));
     }
 
+    private void populateDependentsList(ModuleDefinition moduleDef) {
+        dependentList.getItems().clear();
+        dependentList.getItems().addAll(graph.incomingEdgesOf(moduleDef).stream()
+            .map(edge -> edge.getSource().name)
+            .distinct()
+            .sorted()
+            .toList());
+    }
+
     private void getModules() {
         try (Stream<Path> stream = Files.walk(moduleRoot.toPath())) {
             modules = stream
@@ -209,27 +231,39 @@ public class ModuleGraphController {
                     }
                 })
                 .collect(Collectors.toMap(ModuleDefinition::getName, Function.identity()));
+            createGraph();
         } catch (IOException e) {
-            modules =  new LinkedHashMap<>();
+            modules = new LinkedHashMap<>();
         }
-        graph = createGraph();
     }
 
-    private Graph<ModuleDefinition, DefaultEdge> createGraph() {
-        Graph<ModuleDefinition, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
-        modules.values().forEach(g::addVertex);
+    private void createGraph() {
+        graph = new DefaultDirectedGraph<>(DependencyEdge.class);
+        // Add all modules as vertices first
+        modules.values().forEach(graph::addVertex);
 
+        // Add outgoing edges (module -> dependency)
         modules.values().forEach(module -> {
             module.dependencies.forEach(dep -> {
                 ModuleDefinition target = modules.get(dep.name);
+                // Some dependencies (e.g., JDK modules) are not present in the graph
                 if (target != null) {
-                    g.addEdge(module, target);
-                    g.addEdge(target, module);
+                    graph.addEdge(module, target);
+//                    graph.addEdge(target, module);
                 }
             });
         });
-
-        return g;
     }
 
+    public static class DependencyEdge extends DefaultEdge {
+        @Override
+        public ModuleDefinition getSource() {
+            return (ModuleDefinition) super.getSource();
+        }
+
+        @Override
+        public ModuleDefinition getTarget() {
+            return (ModuleDefinition) super.getTarget();
+        }
+    }
 }
