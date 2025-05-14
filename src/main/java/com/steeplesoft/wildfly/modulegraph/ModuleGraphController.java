@@ -16,6 +16,9 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.common.graph.Graph;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
 import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
 import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
 import javafx.event.ActionEvent;
@@ -29,17 +32,16 @@ import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ModuleGraphController {
     private final XmlMapper mapper;
     private final Preferences preferences = Preferences.userRoot().node("com/steeplesoft/wildfly/modulegraph");
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
-    private Graph<ModuleDefinition, DependencyEdge> graph;
+    @SuppressWarnings("UnstableApiUsage")
+    private MutableGraph<ModuleDefinition> graph;
     private final ArrayDeque<String> backStack = new ArrayDeque<>();
     private String moduleFilter;
 
@@ -211,8 +213,8 @@ public class ModuleGraphController {
 
     private void populateDependentsList(ModuleDefinition moduleDef) {
         dependentList.getItems().clear();
-        dependentList.getItems().addAll(graph.incomingEdgesOf(moduleDef).stream()
-            .map(edge -> edge.getSource().name)
+        dependentList.getItems().addAll(graph.incidentEdges(moduleDef).stream()
+            .map(pair -> pair.source().name)
             .distinct()
             .sorted()
             .toList());
@@ -238,9 +240,9 @@ public class ModuleGraphController {
     }
 
     private void createGraph() {
-        graph = new DefaultDirectedGraph<>(DependencyEdge.class);
+        graph = GraphBuilder.directed().allowsSelfLoops(true).build();
         // Add all modules as vertices first
-        modules.values().forEach(graph::addVertex);
+        modules.values().forEach(module -> graph.addNode(module));
 
         // Add outgoing edges (module -> dependency)
         modules.values().forEach(module -> {
@@ -248,13 +250,13 @@ public class ModuleGraphController {
                 ModuleDefinition target = modules.get(dep.name);
                 // Some dependencies (e.g., JDK modules) are not present in the graph
                 if (target != null) {
-                    graph.addEdge(module, target);
-//                    graph.addEdge(target, module);
+                    graph.putEdge(module, target);
                 }
             });
         });
     }
 
+/*
     public static class DependencyEdge extends DefaultEdge {
         @Override
         public ModuleDefinition getSource() {
@@ -266,4 +268,5 @@ public class ModuleGraphController {
             return (ModuleDefinition) super.getTarget();
         }
     }
+*/
 }

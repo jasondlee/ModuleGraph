@@ -6,7 +6,7 @@ module modulegraph {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires org.jgrapht.core;
+    requires com.google.common;
 
     opens com.steeplesoft.wildfly.modulegraph to javafx.fxml;
     exports com.steeplesoft.wildfly.modulegraph;
