@@ -90,10 +90,14 @@
                 <executions>
                     <execution>
                         <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jlink</goal>
+                        </goals>
                         <configuration>
                             <mainClass>${main.class}</mainClass>
                             <launcher>${app.name}</launcher>
-                            <jlinkZipName>${app.name}</jlinkZipName>
+                            <jlinkZipName>${app.name}-${os.arch}</jlinkZipName>
                             <jlinkImageName>${app.name}</jlinkImageName>
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
@@ -138,6 +142,6 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins> 
+        </plugins>
     </build>
 </project>
