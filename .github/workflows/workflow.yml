@@ -32,7 +32,5 @@ jobs:
 
             - uses: actions/upload-artifact@v4
               with:
-                name: Package
-                path: |
-                    target/modulegraph*jar
-                    target/module*zip
+                name: modulegraph-${{ matrix.os }}.zip
+                path: target/module*zip
