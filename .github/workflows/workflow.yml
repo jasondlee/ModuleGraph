@@ -24,7 +24,7 @@ jobs:
             - name: Set up JDK
               uses: actions/setup-java@v4
               with:
-                  distribution: ${{ matrix.dist }}
+                  distribution: temurin
                   java-version: ${{ matrix.java }}
                   cache: 'maven'
 
