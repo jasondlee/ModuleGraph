@@ -20,7 +20,6 @@ jobs:
             - name: Check out project
               uses: actions/checkout@v4
 
-
             - name: Set up JDK
               uses: actions/setup-java@v4
               with:
@@ -29,4 +28,11 @@ jobs:
                   cache: 'maven'
 
             - name: Build with Maven
-              run: mvn package
+              run: mvn package -Dos=${{ matrix.os }}
+
+            - uses: actions/upload-artifact@v4
+              with:
+                name: Package
+                path: |
+                    target/modulegraph*jar
+                    target/module*zip
