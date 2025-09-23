@@ -54,7 +54,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="908.0" prefWidth="1208.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.steeplesoft.wildfly.modulegraph.ModuleGraphController">
+<VBox prefHeight="908.0" prefWidth="1208.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ModuleGraphController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>

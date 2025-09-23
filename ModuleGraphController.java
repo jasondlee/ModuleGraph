@@ -1,5 +1,3 @@
-package com.steeplesoft.wildfly.modulegraph;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,8 +17,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
+import model.ModuleDefinition;
+import model.ModuleDependency;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

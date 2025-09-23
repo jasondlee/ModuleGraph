@@ -1,4 +1,4 @@
-package com.steeplesoft.wildfly.modulegraph.model;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;

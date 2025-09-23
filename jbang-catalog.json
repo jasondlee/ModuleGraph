@@ -1,0 +1,7 @@
+{
+  "aliases": {
+    "modulegraph": {
+      "script-ref": "ModuleGraphApplication.java"
+    }
+  }
+}

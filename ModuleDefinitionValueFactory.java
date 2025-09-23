@@ -1,10 +1,8 @@
-package com.steeplesoft.wildfly.modulegraph;
-
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
+import model.ModuleDependency;
 
 public class ModuleDefinitionValueFactory implements Callback<TableColumn.CellDataFeatures<ModuleDependency, String>, ObservableValue<String>> {
     private final String field;

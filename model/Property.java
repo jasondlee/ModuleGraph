@@ -1,4 +1,4 @@
-package com.steeplesoft.wildfly.modulegraph.model;
+package model;
 
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ public class Property {
         if (o == null || getClass() != o.getClass()) return false;
         Property property = (Property) o;
         return Objects.equals(name, property.name) &&
-            Objects.equals(value, property.value);
+                Objects.equals(value, property.value);
     }
 
     @Override
@@ -23,8 +23,8 @@ public class Property {
     @Override
     public String toString() {
         return "Property{" +
-            "name='" + name + '\'' +
-            ", value='" + value + '\'' +
-            '}';
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }
