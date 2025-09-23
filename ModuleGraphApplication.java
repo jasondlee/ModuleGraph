@@ -5,7 +5,8 @@
 //DEPS com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.3
 //DEPS com.google.guava:guava:33.4.8-jre
 //FILES resources/icon.png resources/window.fxml
-//SOURCES ModuleDefinitionTreeItem.java ModuleDefinitionValueFactory.java ModuleGraphController.java model/*
+//SOURCES ModuleDefinitionTreeItem.java ModuleDefinitionValueFactory.java ModuleGraphController.java
+//SOURCES model/Artifact.java model/Condition.java model/Dependency.java  model/Filter.java model/ModuleDefinition.java model/ModuleDependency.java model/PathSet.java model/PathSpec.java model/Property.java
 
 import java.io.IOException;
 
