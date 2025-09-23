@@ -4,7 +4,7 @@
 //DEPS org.openjfx:javafx-fxml:21.0.4
 //DEPS com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.3
 //DEPS com.google.guava:guava:33.4.8-jre
-//FILES resources/
+//FILES resources/icon.png resources/window.fxml
 //SOURCES ModuleDefinitionTreeItem.java ModuleDefinitionValueFactory.java ModuleGraphController.java model/*
 
 import java.io.IOException;
