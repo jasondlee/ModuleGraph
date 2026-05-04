@@ -23,6 +23,7 @@ import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
 import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
@@ -92,8 +93,12 @@ public class ModuleGraphController {
         String moduleDir = preferences.get("moduleRoot", null);
         if (moduleDir != null) {
             moduleRoot = new File(moduleDir);
-            getModules();
-            populateTree();
+            if (moduleRoot.exists()) {
+                getModules();
+                populateTree();
+            } else {
+                moduleRoot = null;
+            }
         }
     }
 
@@ -102,16 +107,20 @@ public class ModuleGraphController {
         DirectoryChooser chooser = new DirectoryChooser();
 
         chooser.setTitle("Open Module Root");
-        if (moduleRoot != null) {
-            chooser.setInitialDirectory(moduleRoot);
-        }
+        chooser.setInitialDirectory((moduleRoot != null) ? moduleRoot: new File(System.getProperty("user.home")));
 
-        File selectedDir = chooser.showDialog(moduleTree.getScene().getWindow());
-        if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
-            moduleRoot = selectedDir;
-            preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
-            getModules();
-            populateTree();
+        try {
+            File selectedDir = chooser.showDialog(moduleTree.getScene().getWindow());
+            if (selectedDir != null && selectedDir.exists() && selectedDir.isDirectory()) {
+                moduleRoot = selectedDir;
+                preferences.put("moduleRoot", moduleRoot.getAbsolutePath());
+                getModules();
+                populateTree();
+            }
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setContentText("Failed to open module root: " + e.getMessage() + "\n" + chooser.getInitialDirectory());
+            a.show();
         }
     }
 

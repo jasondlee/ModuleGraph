@@ -1,6 +1,7 @@
 package com.steeplesoft.wildfly.modulegraph;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -16,8 +17,11 @@ public class ModuleGraphApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // https://www.flaticon.com/free-icons/graph
-        Image image = new Image("icon.png");
-        stage.getIcons().add(image);
+        InputStream icon = getClass().getResourceAsStream("icon.png");
+        if (icon != null) {
+            Image image = new Image(icon);
+            stage.getIcons().add(image);
+        }
 
         FXMLLoader fxmlLoader = new FXMLLoader(ModuleGraphApplication.class.getResource("/window.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1024, 768);
