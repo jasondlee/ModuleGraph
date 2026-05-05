@@ -1,6 +1,6 @@
-package com.steeplesoft.wildfly.modulegraph;
+package com.steeplesoft.modulegraph;
 
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
+import com.steeplesoft.modulegraph.model.ModuleDefinition;
 import javafx.scene.control.TreeItem;
 
 public class ModuleDefinitionTreeItem extends TreeItem<ModuleDefinition> {

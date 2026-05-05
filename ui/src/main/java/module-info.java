@@ -8,7 +8,7 @@ module modulegraph {
     requires javafx.graphics;
     requires com.google.common;
 
-    opens com.steeplesoft.wildfly.modulegraph to javafx.fxml;
-    exports com.steeplesoft.wildfly.modulegraph;
-    exports com.steeplesoft.wildfly.modulegraph.model;
+    opens com.steeplesoft.modulegraph to javafx.fxml;
+    exports com.steeplesoft.modulegraph;
+    exports com.steeplesoft.modulegraph.model;
 }

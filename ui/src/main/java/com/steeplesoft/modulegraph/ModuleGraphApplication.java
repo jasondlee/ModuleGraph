@@ -1,4 +1,4 @@
-package com.steeplesoft.wildfly.modulegraph;
+package com.steeplesoft.modulegraph;
 
 import java.io.IOException;
 import java.io.InputStream;

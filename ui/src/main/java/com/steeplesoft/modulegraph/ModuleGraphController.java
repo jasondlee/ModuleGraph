@@ -1,4 +1,4 @@
-package com.steeplesoft.wildfly.modulegraph;
+package com.steeplesoft.modulegraph;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +16,10 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDefinition;
-import com.steeplesoft.wildfly.modulegraph.model.ModuleDependency;
+import com.steeplesoft.modulegraph.model.ModuleDefinition;
+import com.steeplesoft.modulegraph.model.ModuleDependency;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -37,7 +36,7 @@ import javafx.stage.DirectoryChooser;
 @SuppressWarnings("UnstableApiUsage")
 public class ModuleGraphController {
     private final XmlMapper mapper;
-    private final Preferences preferences = Preferences.userRoot().node("com/steeplesoft/wildfly/modulegraph");
+    private final Preferences preferences = Preferences.userRoot().node("com/steeplesoft/modulegraph");
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
@@ -132,8 +131,8 @@ public class ModuleGraphController {
     }
 
     private void pushModuleToBackStack(ModuleDefinition moduleDef) {
-        if (!Objects.equals(backStack.peek(), moduleDef.name)) {
-            backStack.push(moduleDef.name);
+        if (!Objects.equals(backStack.peek(), moduleDef.name())) {
+            backStack.push(moduleDef.name());
         }
     }
 
@@ -141,7 +140,7 @@ public class ModuleGraphController {
     private void onDependencyClicked(MouseEvent event) {
         if (event.getButton().equals(MouseButton.PRIMARY)) {
             pushModuleToBackStack(moduleTree.getSelectionModel().getSelectedItem().getValue());
-            navigateToModule(dependencyTable.getSelectionModel().getSelectedItem().name);
+            navigateToModule(dependencyTable.getSelectionModel().getSelectedItem().name());
         }
     }
 
@@ -156,7 +155,7 @@ public class ModuleGraphController {
     @FXML
     private void onBackClicked(MouseEvent event) {
         if (!backStack.isEmpty()) {
-            var current = moduleTree.getSelectionModel().getSelectedItem().getValue().name;
+            var current = moduleTree.getSelectionModel().getSelectedItem().getValue().name();
             var back = backStack.pop();
             while (!backStack.isEmpty() && Objects.equals(current, back)) {
                 back = backStack.pop();
@@ -167,9 +166,9 @@ public class ModuleGraphController {
 
     private void populateMetadata() {
         var moduleDef = moduleTree.getSelectionModel().getSelectedItem().getValue();
-        moduleName.setText(moduleDef.getName());
-        moduleVersion.setText(moduleDef.version);
-        mainClass.setText(moduleDef.mainClass);
+        moduleName.setText(moduleDef.name());
+        moduleVersion.setText(moduleDef.version());
+        mainClass.setText(moduleDef.mainClass());
 
         populateResourceList(moduleDef);
         populateDependencyTable(moduleDef);
@@ -178,7 +177,7 @@ public class ModuleGraphController {
 
     private void navigateToModule(String moduleDef) {
         moduleTree.getRoot().getChildren().stream()
-            .filter(item -> item.getValue().name.equals(moduleDef))
+            .filter(item -> item.getValue().name().equals(moduleDef))
             .findFirst()
             .ifPresent(item -> moduleTree.getSelectionModel().select(item));
         moduleTree.scrollTo(moduleTree.getSelectionModel().getSelectedIndex());
@@ -191,7 +190,7 @@ public class ModuleGraphController {
         modules.values().stream()
             .filter(module -> {
                 if (moduleFilter != null && !modules.isEmpty()) {
-                    return module.name.toLowerCase(Locale.ROOT).contains(moduleFilter.toLowerCase(Locale.ROOT));
+                    return module.name().toLowerCase(Locale.ROOT).contains(moduleFilter.toLowerCase(Locale.ROOT));
                 } else {
                     return true;
                 }
@@ -204,10 +203,10 @@ public class ModuleGraphController {
 
     private void populateResourceList(ModuleDefinition moduleDef) {
         resourceList.getItems().clear();
-        moduleDef.resources.forEach(artifact -> {
-            String name = artifact.name;
+        moduleDef.resources().forEach(artifact -> {
+            String name = artifact.name();
             if (name == null) {
-                name = artifact.path;
+                name = artifact.path();
             }
             if (name != null) {
                 resourceList.getItems().add(name);
@@ -217,13 +216,13 @@ public class ModuleGraphController {
 
     private void populateDependencyTable(ModuleDefinition moduleDef) {
         dependencyTable.getItems().clear();
-        moduleDef.dependencies.forEach(dep -> dependencyTable.getItems().add(dep));
+        moduleDef.dependencies().forEach(dep -> dependencyTable.getItems().add(dep));
     }
 
     private void populateDependentsList(ModuleDefinition moduleDef) {
         dependentList.getItems().clear();
         dependentList.getItems().addAll(graph.incidentEdges(moduleDef).stream()
-            .map(pair -> pair.source().name)
+            .map(pair -> pair.source().name())
             .distinct()
             .sorted()
             .toList());
@@ -241,7 +240,7 @@ public class ModuleGraphController {
                         throw new RuntimeException(e);
                     }
                 })
-                .collect(Collectors.toMap(ModuleDefinition::getName, Function.identity()));
+                .collect(Collectors.toMap(ModuleDefinition::name, Function.identity()));
             createGraph();
         } catch (IOException e) {
             modules = new LinkedHashMap<>();
@@ -255,8 +254,8 @@ public class ModuleGraphController {
 
         // Add outgoing edges (module -> dependency)
         modules.values().forEach(module -> {
-            module.dependencies.forEach(dep -> {
-                ModuleDefinition target = modules.get(dep.name);
+            module.dependencies().forEach(dep -> {
+                ModuleDefinition target = modules.get(dep.name());
                 // Some dependencies (e.g., JDK modules) are not present in the graph
                 if (target != null) {
                     graph.putEdge(module, target);
