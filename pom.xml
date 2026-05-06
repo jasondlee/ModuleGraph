@@ -5,15 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.steeplesoft.wildfly</groupId>
-    <artifactId>modulegraph-parent</artifactId>
+    <artifactId>modulegraph</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>modulegraph-parent</name>
-
-    <modules>
-        <module>rattle</module>
-        <module>ui</module>
-    </modules>
+    <packaging>jar</packaging>
+    <name>Module Graph</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,6 +23,8 @@
         <version.jgrapht>1.5.2</version.jgrapht>
         <version.junit>6.0.3</version.junit>
         <version.tamboui>0.2.1-SNAPSHOT</version.tamboui>
+
+        <main.class>com.steeplesoft.modulegraph.ModuleGraph</main.class>
     </properties>
 
     <licenses>
@@ -65,6 +62,29 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- For Toolkit DSL (recommended) -->
+        <dependency>
+            <groupId>dev.tamboui</groupId>
+            <artifactId>tamboui-toolkit</artifactId>
+        </dependency>
+
+        <!-- JLine backend (one backend is required) -->
+        <dependency>
+            <groupId>dev.tamboui</groupId>
+            <artifactId>tamboui-jline3-backend</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>${version.jackson}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.6.0-jre</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -148,13 +168,72 @@
                                     <version>3.9</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>21</version>
+                                    <version>${jdk.min.version}</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main.class}</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${main.class}</mainClass>
+                                </transformer>
+                            </transformers>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/substrate/**</exclude>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/NOTICE</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>
