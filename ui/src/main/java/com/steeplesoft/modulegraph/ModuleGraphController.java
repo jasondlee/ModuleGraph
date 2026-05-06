@@ -6,9 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -19,32 +17,18 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import com.steeplesoft.modulegraph.model.ModuleDefinition;
-import com.steeplesoft.modulegraph.model.ModuleDependency;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.DirectoryChooser;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ModuleGraphController {
     private final XmlMapper mapper;
     private final Preferences preferences = Preferences.userRoot().node("com/steeplesoft/modulegraph");
 
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
-    @SuppressWarnings("UnstableApiUsage")
     private MutableGraph<ModuleDefinition> graph;
     private final ArrayDeque<String> backStack = new ArrayDeque<>();
     private String moduleFilter;
 
+/*
     @FXML
     private Label moduleName;
     @FXML
@@ -69,38 +53,40 @@ public class ModuleGraphController {
     private TreeView<ModuleDefinition> moduleTree;
     @FXML
     private TextField moduleFilterTextField;
+*/
 
     public ModuleGraphController() {
         mapper = new XmlMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    @FXML
+//    @FXML
     private void initialize() {
-        moduleTree.setShowRoot(false);
-
-        moduleNameColumn.setCellValueFactory(new ModuleDefinitionValueFactory("name"));
-        moduleExportColumn.setCellValueFactory(new ModuleDefinitionValueFactory("export"));
-        moduleServicesColumn.setCellValueFactory(new ModuleDefinitionValueFactory("services"));
-        moduleOptionalColumn.setCellValueFactory(new ModuleDefinitionValueFactory("optional"));
-
-        moduleFilterTextField.textProperty().addListener((obs, oldText, newText) -> {
-            moduleFilter = newText;
-            populateTree();
-        });
+//        moduleTree.setShowRoot(false);
+//
+//        moduleNameColumn.setCellValueFactory(new ModuleDefinitionValueFactory("name"));
+//        moduleExportColumn.setCellValueFactory(new ModuleDefinitionValueFactory("export"));
+//        moduleServicesColumn.setCellValueFactory(new ModuleDefinitionValueFactory("services"));
+//        moduleOptionalColumn.setCellValueFactory(new ModuleDefinitionValueFactory("optional"));
+//
+//        moduleFilterTextField.textProperty().addListener((obs, oldText, newText) -> {
+//            moduleFilter = newText;
+//            populateTree();
+//        });
 
         String moduleDir = preferences.get("moduleRoot", null);
         if (moduleDir != null) {
             moduleRoot = new File(moduleDir);
             if (moduleRoot.exists()) {
                 getModules();
-                populateTree();
+//                populateTree();
             } else {
                 moduleRoot = null;
             }
         }
     }
 
+/*
     @FXML
     private void openModuleRoot(ActionEvent event) {
         DirectoryChooser chooser = new DirectoryChooser();
@@ -227,6 +213,7 @@ public class ModuleGraphController {
             .sorted()
             .toList());
     }
+*/
 
     private void getModules() {
         try (Stream<Path> stream = Files.walk(moduleRoot.toPath())) {
@@ -263,18 +250,4 @@ public class ModuleGraphController {
             });
         });
     }
-
-/*
-    public static class DependencyEdge extends DefaultEdge {
-        @Override
-        public ModuleDefinition getSource() {
-            return (ModuleDefinition) super.getSource();
-        }
-
-        @Override
-        public ModuleDefinition getTarget() {
-            return (ModuleDefinition) super.getTarget();
-        }
-    }
-*/
 }
