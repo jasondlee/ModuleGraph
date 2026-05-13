@@ -4,101 +4,192 @@ import static dev.tamboui.toolkit.Toolkit.column;
 import static dev.tamboui.toolkit.Toolkit.list;
 import static dev.tamboui.toolkit.Toolkit.panel;
 import static dev.tamboui.toolkit.Toolkit.row;
+import static dev.tamboui.toolkit.Toolkit.spacer;
+import static dev.tamboui.toolkit.Toolkit.tabs;
 import static dev.tamboui.toolkit.Toolkit.text;
 
 import java.util.List;
 
+import com.steeplesoft.modulegraph.model.ModuleDefinition;
 import dev.tamboui.layout.Constraint;
+import dev.tamboui.layout.Rect;
 import dev.tamboui.style.Color;
-import dev.tamboui.toolkit.app.ToolkitApp;
+import dev.tamboui.terminal.Frame;
+import dev.tamboui.toolkit.app.ToolkitRunner;
 import dev.tamboui.toolkit.element.Element;
+import dev.tamboui.toolkit.element.RenderContext;
+import dev.tamboui.toolkit.element.Size;
 import dev.tamboui.toolkit.elements.ListElement;
+import dev.tamboui.toolkit.elements.Panel;
+import dev.tamboui.toolkit.event.EventResult;
 import dev.tamboui.tui.TuiConfig;
-import dev.tamboui.tui.TuiRunner;
-import dev.tamboui.tui.event.Event;
+import dev.tamboui.tui.bindings.ActionHandler;
+import dev.tamboui.tui.bindings.BindingSets;
+import dev.tamboui.tui.bindings.KeyTrigger;
 import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.KeyEvent;
+import dev.tamboui.tui.event.MouseEvent;
+import dev.tamboui.widgets.tabs.TabsState;
 
-public class ModuleGraph extends ToolkitApp {
-    private final ListElement<?> listElement = list();
-    private final String moduleDir;
+public class ModuleGraph implements Element { //extends ToolkitApp {
+    private final ListElement<?> listElement = list().highlightSymbol("> ")
+            .highlightColor(Color.YELLOW)
+            .autoScroll()
+            .scrollbar()
+            .scrollbarThumbColor(Color.CYAN);
+    private final TabsState tabsState = new TabsState(0);
+    private List<ModuleDefinition> modules;
 
     public static void main(String[] args) throws Exception {
         // TODO: aesh
-        new ModuleGraph(args[0]).run();
+        new ModuleGraph().run(args[0]);
     }
 
-    public ModuleGraph(String moduleDir) {
-        this.moduleDir = moduleDir;
+    private static Panel footerPanel() {
+        return panel(
+                () -> row(
+                        text(" Up/Down: Navigate ").dim(),
+                        text(" | F1 Resources Tab ").dim(),
+                        text(" | F2 Dependencies Tab ").dim(),
+                        text(" | F3 Dependents Tab ").dim(),
+                        text(" | q: Quit ").dim()
+                )
+        ).rounded().borderColor(Color.DARK_GRAY).length(3);
     }
 
-    @Override
-    protected void onStart() {
-        var parser = new ModulesParser(moduleDir);
-        parser.getModules().values().stream().sorted().forEach(module -> {
+    private static Panel generateTitlePanel() {
+        return panel(
+                text("JBoss Modules Analyzer")
+                        .bold()
+                        .cyan()
+        )
+                .rounded()
+                .borderColor(Color.CYAN)
+                .length(3);
+    }
+
+    public void run(String moduleDir) throws Exception {
+        modules = new ModulesParser(moduleDir).getModules().values().stream().sorted().toList();
+        modules.forEach(module -> {
             listElement.add(module.name());
         });
-        listElement.highlightSymbol("> ")
-                .highlightColor(Color.YELLOW)
-                .autoScroll()
-                .scrollbar()
-                .scrollbarThumbColor(Color.CYAN);
-        super.onStart();
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected TuiConfig configure() {
-        return TuiConfig.builder()
-//                .rawMode(true)
-//                .alternateScreen(true)
-//                .hideCursor(true)
-                .mouseCapture(true)
+        // Create bindings with F1/F2 for tab switching
+        var bindings = BindingSets.standard()
+                .toBuilder()
+                .bind(KeyTrigger.key(KeyCode.F1), "selectResourcesTab")
+                .bind(KeyTrigger.key(KeyCode.F2), "selectDependenciesTab")
+                .bind(KeyTrigger.key(KeyCode.F3), "selectDependentsTab")
                 .build();
+
+        var config = TuiConfig.builder()
+                .mouseCapture(true)
+                .noTick()
+                .build();
+
+        try (var runner = ToolkitRunner.builder()
+                .config(config)
+                .bindings(bindings)
+                .build()) {
+
+            // Register global handler for tab switching
+            var globalHandler = new ActionHandler(bindings)
+                    .on("selectResourcesTab", e -> tabsState.select(0))
+                    .on("selectDependenciesTab", e -> tabsState.select(1))
+                    .on("selectDependentsTab", e -> tabsState.select(2));
+            runner.eventRouter().addGlobalHandler(globalHandler);
+
+            runner.run(() -> this);
+        }
     }
 
-    private boolean handleEvent(Event event, TuiRunner runner) {
-        if (!(event instanceof KeyEvent)) {
-            return true;
-        }
-
-        KeyEvent k = (KeyEvent) event;
-        if (k.isQuit() || k.code() == KeyCode.ESCAPE) {
-            runner.quit();
-            return false;
-        }
-
-
-        return true;
-    }
-
-    public Element render() {
-        return column(
-                panel(
-                        text(" Rich List Demo - ListElement with StyledElement items ")
-                                .bold()
-                                .cyan()
-                )
-                        .rounded()
-                        .borderColor(Color.CYAN)
-                        .length(3),
-                row (
-                        panel(listElement)
-                                .title("Rich Items (" + 12 + " items)")
-                                .rounded()
-                                .borderColor(Color.WHITE)
-                                .id("list-panel")
-                                .focusable()
-//                                .onKeyEvent(this::handleKey)
-                                .constraint(Constraint.percentage(25))
+    @Override
+    public void render(Frame frame, Rect area, RenderContext context) {
+        column(
+                generateTitlePanel(),
+                row(
+                        navigationPanel(),
+                        infoPanel()
                 ).fill(),
-                panel(
-                        text(" Up/Down: Navigate | q: Quit ").dim()
-                ).rounded().borderColor(Color.DARK_GRAY).length(3)
-        );
+                footerPanel()
+        ).render(frame, area, context);
+    }
+
+    @Override
+    public Size preferredSize(int availableWidth, int availableHeight, RenderContext context) {
+        return Size.UNKNOWN;
+    }
+
+    private Panel navigationPanel() {
+        return panel(listElement)
+                .title("Rich Items (" + 12 + " items)")
+                .rounded()
+                .borderColor(Color.WHITE)
+                .id("list-panel")
+                .focusable()
+                .onKeyEvent(this::handleKey)
+                .constraint(Constraint.percentage(25));
+    }
+
+    private EventResult handleMouse(MouseEvent mouseEvent) {
+        System.out.println(mouseEvent.toString());
+        return EventResult.UNHANDLED;
+    }
+
+    private EventResult handleKey(KeyEvent event) {
+//        if (event.isUp()) {
+//            listElement.selectPrevious();
+//            return EventResult.HANDLED;
+//        }
+//        if (event.isDown()) {
+//            listElement.selectNext(1);
+//            return EventResult.HANDLED;
+//        }
+        return EventResult.UNHANDLED;
+    }
+
+    private Panel infoPanel() {
+        ModuleDefinition module = modules.get(listElement.selected());
+        var version = module.version().isBlank() ? "-" : module.version();
+        var mainClass = (module.mainClass() == null) ? "-" : module.mainClass();
+        return panel(
+                text("Module Information")
+                        .bold()
+                        .cyan(),
+                text("Module Name:    " + module.name()),
+                text("Module Version: " + version),
+                text("Main Class:     " + mainClass),
+                spacer(1),
+                tabs("Resources", "Dependencies", "Dependents")
+                        .state(tabsState)
+                        .focusable()
+                        .id("tabs"),
+                renderTabPanel()
+        )
+                .rounded()
+                .borderColor(Color.CYAN)
+                .id("info-panel")
+                .focusable()
+                .fill();
+    }
+
+    private Panel renderTabPanel() {
+        return switch (tabsState.selected()) {
+            case 1 -> panel(
+                    text("Tab Content Here").dim()
+            )
+                    .title("Dependencies")
+                    .fill();
+            case 2 -> panel(
+                    text("Tab Content Here").dim()
+            )
+                    .title("Dependents")
+                    .fill();
+            default -> panel(
+                    text("Tab Content Here").dim()
+            )
+                    .title("Resources")
+                    .fill();
+        };
     }
 }
