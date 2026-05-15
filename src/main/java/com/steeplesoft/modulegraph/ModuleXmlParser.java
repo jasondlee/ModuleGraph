@@ -1,7 +1,9 @@
 package com.steeplesoft.modulegraph;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,10 +34,14 @@ public class ModuleXmlParser {
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
     }
 
-    public ModuleDefinition parse(Path xmlFile) throws IOException, XMLStreamException {
-        try (InputStream is = Files.newInputStream(xmlFile)) {
+    private ModuleDefinition parse(URL xmlFile) throws IOException, XMLStreamException {
+        try (InputStream is = new BufferedInputStream(xmlFile.openStream())) {
             return parse(is);
         }
+    }
+
+    public ModuleDefinition parse(Path xmlFile) throws IOException, XMLStreamException {
+        return parse(xmlFile.toUri().toURL());
     }
 
     public ModuleDefinition parse(InputStream is) throws XMLStreamException {
@@ -49,7 +55,7 @@ public class ModuleXmlParser {
                     if ("module-alias".equals(reader.getLocalName())) {
                         return readModuleAlias(reader);
                     }
-                    LOGGER.warning("Expected root <module> or <module-alias> element but found <" + reader.getLocalName() + ">");
+                    LOGGER.fine("Expected root <module> or <module-alias> element but found <" + reader.getLocalName() + ">");
                     skipElement(reader);
                 }
             }
@@ -96,7 +102,7 @@ public class ModuleXmlParser {
                         skipElement(reader);
                     }
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside <module>, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <module>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -130,7 +136,7 @@ public class ModuleXmlParser {
                     properties.add(new Property(name, value));
                     skipElement(reader);
                 } else {
-                    LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside <properties>, skipping");
+                    LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <properties>, skipping");
                     skipElement(reader);
                 }
             }
@@ -158,7 +164,7 @@ public class ModuleXmlParser {
                         resources.add(readArtifact(reader, null, path));
                     }
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside <resources>, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <resources>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -182,7 +188,7 @@ public class ModuleXmlParser {
                     case "filter" -> filters.add(readFilter(reader));
                     case "conditions" -> conditions.addAll(readConditions(reader));
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside resource element, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside resource element, skipping");
                         skipElement(reader);
                     }
                 }
@@ -213,7 +219,7 @@ public class ModuleXmlParser {
                         skipElement(reader);
                     }
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside <conditions>, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <conditions>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -239,7 +245,7 @@ public class ModuleXmlParser {
                         skipElement(reader);
                     }
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside <dependencies>, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <dependencies>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -270,7 +276,7 @@ public class ModuleXmlParser {
                     case "imports" -> imports.add(readFilter(reader));
                     case "exports" -> exports.add(readFilter(reader));
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside dependency <module>, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside dependency <module>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -312,7 +318,7 @@ public class ModuleXmlParser {
                     case "include-set" -> includeSet.add(readPathSet(reader));
                     case "exclude-set" -> excludeSet.add(readPathSet(reader));
                     default -> {
-                        LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside filter/exports/imports, skipping");
+                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside filter/exports/imports, skipping");
                         skipElement(reader);
                     }
                 }
@@ -336,7 +342,7 @@ public class ModuleXmlParser {
                     paths.add(new PathSpec(name));
                     skipElement(reader);
                 } else {
-                    LOGGER.warning("Unexpected element <" + reader.getLocalName() + "> inside path set, skipping");
+                    LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside path set, skipping");
                     skipElement(reader);
                 }
             }
