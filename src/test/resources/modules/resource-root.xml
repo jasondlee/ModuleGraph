@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.resource.root" xmlns="urn:jboss:module:1.9">
+    <resources>
+        <resource-root path="lib"/>
+        <resource-root path="service-loader-resources"/>
+        <artifact name="com.example:test:1.0"/>
+    </resources>
+</module>

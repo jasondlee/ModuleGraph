@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.dep.imports" xmlns="urn:jboss:module:1.9">
+    <dependencies>
+        <module name="some.module" optional="true" services="import">
+            <imports>
+                <include path="META-INF/services"/>
+                <exclude path="META-INF/internal"/>
+            </imports>
+        </module>
+    </dependencies>
+</module>

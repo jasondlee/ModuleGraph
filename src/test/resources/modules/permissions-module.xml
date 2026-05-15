@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.permissions" xmlns="urn:jboss:module:1.9">
+    <permissions>
+        <grant permission="java.security.AllPermission"/>
+    </permissions>
+</module>

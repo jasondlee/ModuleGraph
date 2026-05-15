@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.unexpected.conditions" xmlns="urn:jboss:module:1.9">
+    <resources>
+        <artifact name="com.example:test:1.0">
+            <conditions>
+                <unknown-condition-child/>
+                <property-equal name="test.prop"/>
+            </conditions>
+        </artifact>
+    </resources>
+</module>

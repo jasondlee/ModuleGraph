@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.dep.properties" xmlns="urn:jboss:module:1.9">
+    <dependencies>
+        <module name="some.module">
+            <properties>
+                <property name="jboss.api" value="private"/>
+                <property name="custom.key" value="custom.value"/>
+            </properties>
+        </module>
+    </dependencies>
+</module>

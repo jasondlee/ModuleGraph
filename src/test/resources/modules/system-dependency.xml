@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="ibm.jdk" xmlns="urn:jboss:module:1.6">
+    <properties>
+        <property name="jboss.api" value="deprecated"/>
+    </properties>
+    <dependencies>
+        <module name="some.other.module"/>
+        <system export="true">
+            <paths>
+                <path name="com/ibm"/>
+                <path name="com/ibm/crypto"/>
+                <path name="com/ibm/crypto/provider"/>
+            </paths>
+        </system>
+    </dependencies>
+</module>

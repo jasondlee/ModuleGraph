@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="io.smallrye.jandex" xmlns="urn:jboss:module:1.9">
+    <properties>
+        <property name="jboss.api" value="private"/>
+    </properties>
+    <main-class name="org.jboss.jandex.Main"/>
+    <resources>
+        <artifact name="io.smallrye:jandex:3.5.3"/>
+    </resources>
+    <dependencies>
+    </dependencies>
+</module>

@@ -19,7 +19,6 @@
 
         <jdk.min.version>${maven.compiler.release}</jdk.min.version>
 
-        <version.jackson>2.21.3</version.jackson>
         <version.jgrapht>1.5.2</version.jgrapht>
         <version.junit>6.0.3</version.junit>
         <version.tamboui>0.3.0</version.tamboui>
@@ -72,12 +71,6 @@
         <dependency>
             <groupId>dev.tamboui</groupId>
             <artifactId>tamboui-jline3-backend</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-            <version>${version.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

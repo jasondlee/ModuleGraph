@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.unexpected" xmlns="urn:jboss:module:1.9">
+    <unknown-module-child>content</unknown-module-child>
+    <properties>
+        <unknown-prop-child/>
+        <property name="k" value="v"/>
+    </properties>
+    <resources>
+        <unknown-resource-child/>
+        <artifact name="com.example:test:1.0">
+            <unknown-artifact-child/>
+        </artifact>
+    </resources>
+    <dependencies>
+        <unknown-dep-child/>
+        <module name="some.dep">
+            <unknown-mod-dep-child/>
+        </module>
+    </dependencies>
+    <exports>
+        <unknown-filter-child/>
+        <include-set>
+            <unknown-pathset-child/>
+            <path name="org/api"/>
+        </include-set>
+    </exports>
+</module>

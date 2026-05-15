@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module-alias name="org.glassfish.jakarta.el" target-name="org.glassfish.expressly" xmlns="urn:jboss:module:1.9"/>

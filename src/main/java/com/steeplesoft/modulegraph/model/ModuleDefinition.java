@@ -2,18 +2,15 @@ package com.steeplesoft.modulegraph.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
-@JacksonXmlRootElement(localName = "module")
 public record ModuleDefinition(
     String name,
     String version,
     String mainClass,
-    @JacksonXmlProperty List<Filter> exports,
+    String alias,
+    List<Filter> exports,
     List<ModuleDependency> dependencies,
-    @JacksonXmlProperty(localName = "resources") List<Artifact> resources,
-    @JacksonXmlProperty(localName = "properties") List<Property> properties,
+    List<Artifact> resources,
+    List<Property> properties,
     List<Object> permissions,
     List<Object> provides) implements Comparable<ModuleDefinition> {
 
@@ -28,7 +25,7 @@ public record ModuleDefinition(
     }
 
     public ModuleDefinition(String name) {
-        this(name, "", null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+        this(name, "", null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     @Override

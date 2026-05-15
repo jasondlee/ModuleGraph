@@ -10,25 +10,21 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import com.steeplesoft.modulegraph.model.ModuleDefinition;
 
 public class ModulesParser {
-    final String moduleDir;
-    private final XmlMapper mapper = new XmlMapper();
-    private File moduleRoot;
+    private final Logger logger = Logger.getLogger(ModulesParser.class.getName());
+    private final ModuleXmlParser parser = new ModuleXmlParser();
+    private final File moduleRoot;
+
     private Map<String, ModuleDefinition> modules;
     private MutableGraph<ModuleDefinition> graph;
-    private final Logger logger = Logger.getLogger(ModulesParser.class.getName());
 
     public ModulesParser(String moduleDir) {
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        this.moduleDir = moduleDir;
-
         moduleRoot = new File(moduleDir);
         if (!moduleRoot.exists()) {
             throw new IllegalArgumentException("Module directory does not exist: " + moduleDir);
@@ -40,6 +36,10 @@ public class ModulesParser {
         return modules;
     }
 
+    public MutableGraph<ModuleDefinition> getGraph() {
+        return graph;
+    }
+
     private void readModules() {
         try (Stream<Path> stream = Files.walk(moduleRoot.toPath())) {
             modules = stream
@@ -47,8 +47,10 @@ public class ModulesParser {
                     .filter(file -> file.getFileName().toString().equals("module.xml"))
                     .map(file -> {
                         try {
-                            return mapper.readValue(file.toFile(), ModuleDefinition.class);
-                        } catch (IOException e) {
+                            return parser.parse(file);
+                        } catch (IOException | XMLStreamException e) {
+                            logger.severe("Error parsing module: " + file.toAbsolutePath());
+                            logger.severe(e.getMessage());
                             throw new RuntimeException(e);
                         }
                     })
@@ -74,9 +76,5 @@ public class ModulesParser {
                 }
             });
         });
-    }
-
-    public MutableGraph<ModuleDefinition> getGraph() {
-        return graph;
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.name.fallback" xmlns="urn:jboss:module:1.9">
+    <exports>
+        <include name="org/fallback/include"/>
+        <exclude name="org/fallback/exclude"/>
+    </exports>
+</module>

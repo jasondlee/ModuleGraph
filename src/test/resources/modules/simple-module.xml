@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="jakarta.annotation.api" xmlns="urn:jboss:module:1.9">
+    <resources>
+        <artifact name="jakarta.annotation:jakarta.annotation-api:3.0.0"/>
+    </resources>
+</module>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.module.exports" xmlns="urn:jboss:module:1.9">
+    <exports>
+        <include path="org/api"/>
+        <exclude path="org/internal"/>
+        <include-set>
+            <path name="org/public/a"/>
+            <path name="org/public/b"/>
+        </include-set>
+        <exclude-set>
+            <path name="org/impl/a"/>
+            <path name="org/impl/b"/>
+        </exclude-set>
+    </exports>
+</module>

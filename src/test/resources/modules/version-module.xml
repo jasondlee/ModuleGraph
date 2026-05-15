@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="test.versioned" version="2.0.1" xmlns="urn:jboss:module:1.9">
+    <resources>
+        <artifact name="com.example:test:2.0.1"/>
+    </resources>
+</module>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="jakarta.resource.api" xmlns="urn:jboss:module:1.9">
+    <resources>
+        <artifact name="jakarta.resource:jakarta.resource-api:2.1.0"/>
+    </resources>
+    <dependencies>
+        <module name="java.desktop"/>
+        <module name="java.naming" export="false">
+            <exports>
+                <include path="javax/naming"/>
+            </exports>
+        </module>
+        <module name="java.sql"/>
+        <module name="java.transaction.xa"/>
+        <module name="jakarta.transaction.api" export="true"/>
+    </dependencies>
+</module>
