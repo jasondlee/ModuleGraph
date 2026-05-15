@@ -17,6 +17,10 @@ $ mvn package
 $ java -jar java -jar target/modulegraph-1.0-SNAPSHOT.jar /path/to/module/root
 ```
 
+The application should look something like this:
+
+image::screenshot.png[]
+
 Future plans include:
 
 * A visual graph of a module's dependencies

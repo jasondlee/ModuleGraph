@@ -176,12 +176,12 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
         return EventResult.UNHANDLED;
     }
 
-    private Panel infoPanel() {
+    private Element infoPanel() {
         ModuleDefinition module = modules.get(listElement.selected());
         var version = module.version().isBlank() ? "-" : module.version();
         var mainClass = (module.mainClass() == null) ? "-" : module.mainClass();
 
-        return panel(
+        return column(
                 text("Module Information")
                         .bold()
                         .cyan(),
@@ -193,11 +193,8 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
                         .state(tabsState)
                         .focusable()
                         .id("tabs"),
-                renderTabPanel()
-        )
-                .borderless()
-                .id("info-panel")
-                .fill();
+                renderTabPanel().fill()
+        ).fill();
     }
 
     private Panel renderTabPanel() {
