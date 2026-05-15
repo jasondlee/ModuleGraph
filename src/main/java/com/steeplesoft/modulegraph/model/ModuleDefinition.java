@@ -32,11 +32,6 @@ public record ModuleDefinition(
     }
 
     @Override
-    public String toString() {
-        return name;
-    }
-
-    @Override
     public int compareTo(ModuleDefinition other) {
         int nameComparison = name == null ? (other.name == null ? 0 : -1) : name.compareTo(other.name);
         if (nameComparison != 0) {

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +23,7 @@ public class ModulesParser {
     private File moduleRoot;
     private Map<String, ModuleDefinition> modules;
     private MutableGraph<ModuleDefinition> graph;
+    private final Logger logger = Logger.getLogger(ModulesParser.class.getName());
 
     public ModulesParser(String moduleDir) {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -74,4 +76,7 @@ public class ModulesParser {
         });
     }
 
+    public MutableGraph<ModuleDefinition> getGraph() {
+        return graph;
+    }
 }
