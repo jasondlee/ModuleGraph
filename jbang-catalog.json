@@ -1,0 +1,8 @@
+{
+  "aliases": {
+    "modulegraph": {
+      "script-ref": "https://github.com/jasondlee/ModuleGraph/blob/master/modulegraph.java",
+      "description": "ModuleGraph"
+    }
+  }
+}
