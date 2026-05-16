@@ -6,7 +6,7 @@
 
     <groupId>com.steeplesoft</groupId>
     <artifactId>modulegraph</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Module Graph</name>
     <description>A TUI tool for visualizing WildFly/JBoss module dependency graphs</description>
