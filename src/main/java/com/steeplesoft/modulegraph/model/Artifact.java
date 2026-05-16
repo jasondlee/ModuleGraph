@@ -4,7 +4,6 @@ import java.util.List;
 
 public record Artifact(
     String name,
-    String path,
     List<Filter> filter,
     List<Condition> conditions) {
 

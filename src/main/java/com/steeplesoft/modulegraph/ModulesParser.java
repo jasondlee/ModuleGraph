@@ -2,6 +2,7 @@ package com.steeplesoft.modulegraph;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -41,7 +42,7 @@ public class ModulesParser {
     }
 
     private void readModules() {
-        try (Stream<Path> stream = Files.walk(moduleRoot.toPath())) {
+        try (Stream<Path> stream = Files.walk(moduleRoot.toPath(), FileVisitOption.FOLLOW_LINKS)) {
             modules = stream
                     .filter(Files::isRegularFile)
                     .filter(file -> file.getFileName().toString().equals("module.xml"))

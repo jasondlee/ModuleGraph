@@ -78,8 +78,7 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("simple-module.xml");
             assertEquals("jakarta.annotation.api", mod.name());
             assertEquals(1, mod.resources().size());
-            assertEquals("jakarta.annotation:jakarta.annotation-api:3.0.0", mod.resources().get(0).name());
-            assertNull(mod.resources().get(0).path());
+            assertEquals("jakarta.annotation:jakarta.annotation-api:3.0.0", mod.resources().getFirst().name());
         }
 
         @Test
@@ -108,18 +107,18 @@ class ModuleXmlParserTest {
         void moduleProperties() throws Exception {
             var mod = parseModuleFile("main-class-module.xml");
             assertEquals(1, mod.properties().size());
-            assertEquals("jboss.api", mod.properties().get(0).name());
-            assertEquals("private", mod.properties().get(0).value());
+            assertEquals("jboss.api", mod.properties().getFirst().name());
+            assertEquals("private", mod.properties().getFirst().value());
         }
 
         @Test
         @DisplayName("multiple properties")
         void multipleProperties() throws Exception {
             var mod = parseModuleFile("dependency-properties.xml");
-            var dep = mod.dependencies().get(0);
+            var dep = mod.dependencies().getFirst();
             assertEquals(2, dep.properties().size());
-            assertEquals("jboss.api", dep.properties().get(0).name());
-            assertEquals("private", dep.properties().get(0).value());
+            assertEquals("jboss.api", dep.properties().getFirst().name());
+            assertEquals("private", dep.properties().getFirst().value());
             assertEquals("custom.key", dep.properties().get(1).name());
             assertEquals("custom.value", dep.properties().get(1).value());
         }
@@ -135,17 +134,14 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("resource-root.xml");
             assertEquals(3, mod.resources().size());
 
-            Artifact root1 = mod.resources().get(0);
-            assertNull(root1.name());
-            assertEquals("lib", root1.path());
+            Artifact root1 = mod.resources().getFirst();
+            assertEquals("lib", root1.name());
 
             Artifact root2 = mod.resources().get(1);
-            assertNull(root2.name());
-            assertEquals("service-loader-resources", root2.path());
+            assertEquals("service-loader-resources", root2.name());
 
             Artifact artifact = mod.resources().get(2);
             assertEquals("com.example:test:1.0", artifact.name());
-            assertNull(artifact.path());
         }
 
         @Test
@@ -154,14 +150,14 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("artifact-with-filter.xml");
             assertEquals(1, mod.resources().size());
 
-            Artifact artifact = mod.resources().get(0);
+            Artifact artifact = mod.resources().getFirst();
             assertEquals(1, artifact.filter().size());
 
-            Filter filter = artifact.filter().get(0);
+            Filter filter = artifact.filter().getFirst();
             assertEquals(1, filter.include().size());
-            assertEquals("com/example/api", filter.include().get(0).path());
+            assertEquals("com/example/api", filter.include().getFirst().path());
             assertEquals(1, filter.exclude().size());
-            assertEquals("com/example/internal", filter.exclude().get(0).path());
+            assertEquals("com/example/internal", filter.exclude().getFirst().path());
         }
 
         @Test
@@ -170,10 +166,10 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("conditions.xml");
             assertEquals(1, mod.resources().size());
 
-            Artifact artifact = mod.resources().get(0);
+            Artifact artifact = mod.resources().getFirst();
             assertEquals(2, artifact.conditions().size());
 
-            var propEqual = artifact.conditions().get(0);
+            var propEqual = artifact.conditions().getFirst();
             assertEquals("jboss.api", propEqual.propertyEqual());
             assertNull(propEqual.propertyNotEqual());
 
@@ -193,7 +189,7 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("dependency-with-exports.xml");
             assertEquals(5, mod.dependencies().size());
 
-            ModuleDependency desktop = mod.dependencies().get(0);
+            ModuleDependency desktop = mod.dependencies().getFirst();
             assertEquals("java.desktop", desktop.name());
             assertFalse(desktop.export());
             assertFalse(desktop.optional());
@@ -212,7 +208,7 @@ class ModuleXmlParserTest {
         @DisplayName("dependency with export, optional, and services attributes")
         void dependencyAttributes() throws Exception {
             var mod = parseModuleFile("provides-module.xml");
-            ModuleDependency dep = mod.dependencies().get(0);
+            ModuleDependency dep = mod.dependencies().getFirst();
             assertEquals("org.bouncycastle.bcpkix", dep.name());
             assertTrue(dep.export());
             assertEquals("export", dep.services());
@@ -222,7 +218,7 @@ class ModuleXmlParserTest {
         @DisplayName("dependency with optional and services=import")
         void dependencyOptionalImport() throws Exception {
             var mod = parseModuleFile("dependency-with-imports.xml");
-            ModuleDependency dep = mod.dependencies().get(0);
+            ModuleDependency dep = mod.dependencies().getFirst();
             assertEquals("some.module", dep.name());
             assertTrue(dep.optional());
             assertEquals("import", dep.services());
@@ -232,7 +228,7 @@ class ModuleXmlParserTest {
         @DisplayName("dependency with properties sub-element")
         void dependencyWithProperties() throws Exception {
             var mod = parseModuleFile("dependency-properties.xml");
-            ModuleDependency dep = mod.dependencies().get(0);
+            ModuleDependency dep = mod.dependencies().getFirst();
             assertEquals(2, dep.properties().size());
         }
 
@@ -243,23 +239,23 @@ class ModuleXmlParserTest {
             ModuleDependency naming = mod.dependencies().get(1);
             assertEquals(1, naming.exports().size());
 
-            Filter filter = naming.exports().get(0);
+            Filter filter = naming.exports().getFirst();
             assertEquals(1, filter.include().size());
-            assertEquals("javax/naming", filter.include().get(0).path());
+            assertEquals("javax/naming", filter.include().getFirst().path());
         }
 
         @Test
         @DisplayName("dependency with imports filter")
         void dependencyWithImportsFilter() throws Exception {
             var mod = parseModuleFile("dependency-with-imports.xml");
-            ModuleDependency dep = mod.dependencies().get(0);
+            ModuleDependency dep = mod.dependencies().getFirst();
             assertEquals(1, dep.imports().size());
 
-            Filter filter = dep.imports().get(0);
+            Filter filter = dep.imports().getFirst();
             assertEquals(1, filter.include().size());
-            assertEquals("META-INF/services", filter.include().get(0).path());
+            assertEquals("META-INF/services", filter.include().getFirst().path());
             assertEquals(1, filter.exclude().size());
-            assertEquals("META-INF/internal", filter.exclude().get(0).path());
+            assertEquals("META-INF/internal", filter.exclude().getFirst().path());
         }
     }
 
@@ -273,21 +269,21 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("module-exports.xml");
             assertEquals(1, mod.exports().size());
 
-            Filter filter = mod.exports().get(0);
+            Filter filter = mod.exports().getFirst();
             assertEquals(1, filter.include().size());
-            assertEquals("org/api", filter.include().get(0).path());
+            assertEquals("org/api", filter.include().getFirst().path());
             assertEquals(1, filter.exclude().size());
-            assertEquals("org/internal", filter.exclude().get(0).path());
+            assertEquals("org/internal", filter.exclude().getFirst().path());
 
             assertEquals(1, filter.includeSet().size());
-            assertEquals(2, filter.includeSet().get(0).path().size());
-            assertEquals("org/public/a", filter.includeSet().get(0).path().get(0).path());
-            assertEquals("org/public/b", filter.includeSet().get(0).path().get(1).path());
+            assertEquals(2, filter.includeSet().getFirst().path().size());
+            assertEquals("org/public/a", filter.includeSet().getFirst().path().getFirst().path());
+            assertEquals("org/public/b", filter.includeSet().getFirst().path().get(1).path());
 
             assertEquals(1, filter.excludeSet().size());
-            assertEquals(2, filter.excludeSet().get(0).path().size());
-            assertEquals("org/impl/a", filter.excludeSet().get(0).path().get(0).path());
-            assertEquals("org/impl/b", filter.excludeSet().get(0).path().get(1).path());
+            assertEquals(2, filter.excludeSet().getFirst().path().size());
+            assertEquals("org/impl/a", filter.excludeSet().getFirst().path().getFirst().path());
+            assertEquals("org/impl/b", filter.excludeSet().getFirst().path().get(1).path());
         }
 
         @Test
@@ -296,11 +292,11 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("include-name-fallback.xml");
             assertEquals(1, mod.exports().size());
 
-            Filter filter = mod.exports().get(0);
+            Filter filter = mod.exports().getFirst();
             assertEquals(1, filter.include().size());
-            assertEquals("org/fallback/include", filter.include().get(0).path());
+            assertEquals("org/fallback/include", filter.include().getFirst().path());
             assertEquals(1, filter.exclude().size());
-            assertEquals("org/fallback/exclude", filter.exclude().get(0).path());
+            assertEquals("org/fallback/exclude", filter.exclude().getFirst().path());
         }
     }
 
@@ -313,7 +309,7 @@ class ModuleXmlParserTest {
         void systemDependencySkipped() throws Exception {
             var mod = parseModuleFile("system-dependency.xml");
             assertEquals(1, mod.dependencies().size());
-            assertEquals("some.other.module", mod.dependencies().get(0).name());
+            assertEquals("some.other.module", mod.dependencies().getFirst().name());
             assertTrue(mod.dependencies().stream().noneMatch(d -> d.name() == null));
         }
 
@@ -419,9 +415,9 @@ class ModuleXmlParserTest {
             var mod = parseModuleFile("unexpected-conditions-child.xml");
             assertNotNull(mod);
 
-            Artifact artifact = mod.resources().get(0);
+            Artifact artifact = mod.resources().getFirst();
             assertEquals(1, artifact.conditions().size());
-            assertEquals("test.prop", artifact.conditions().get(0).propertyEqual());
+            assertEquals("test.prop", artifact.conditions().getFirst().propertyEqual());
 
             var warnings = capturedRecords.stream()
                     .filter(r -> r.getLevel() == Level.WARNING)
@@ -513,8 +509,8 @@ class ModuleXmlParserTest {
                     //parser.parse(Path.of("/Users/jdlee/src/ibm/wildfly/wildfly-full/build/target/wildfly-40.0.0.Final-SNAPSHOT/modules/system/layers/base/org/wildfly/transaction/client/main/module.xml"));
             assertEquals("org.wildfly.transaction.client", mod.name());
             assertEquals(1, mod.exports().size());
-            assertEquals(1, mod.exports().get(0).exclude().size());
-            assertEquals("org/wildfly/transaction/client/_private", mod.exports().get(0).exclude().get(0).path());
+            assertEquals(1, mod.exports().getFirst().exclude().size());
+            assertEquals("org/wildfly/transaction/client/_private", mod.exports().getFirst().exclude().getFirst().path());
             assertEquals(14, mod.dependencies().size());
 
             ModuleDependency ejbClient = mod.dependencies().stream()

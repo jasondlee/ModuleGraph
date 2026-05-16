@@ -4,12 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -25,7 +23,7 @@ import com.steeplesoft.modulegraph.model.PathSpec;
 import com.steeplesoft.modulegraph.model.Property;
 
 public class ModuleXmlParser {
-    private static final Logger LOGGER = Logger.getLogger(ModuleXmlParser.class.getName());
+    private final Logger LOGGER = Logger.getLogger(ModuleXmlParser.class.getName());
     private final XMLInputFactory factory;
 
     public ModuleXmlParser() {
@@ -41,6 +39,7 @@ public class ModuleXmlParser {
     }
 
     public ModuleDefinition parse(Path xmlFile) throws IOException, XMLStreamException {
+        LOGGER.fine("Parsing module file: " + xmlFile);
         return parse(xmlFile.toUri().toURL());
     }
 
@@ -76,15 +75,15 @@ public class ModuleXmlParser {
         List<Object> permissions = new ArrayList<>();
         List<Object> provides = new ArrayList<>();
 
-        warnUnexpectedAttributes(reader, "module", "name", "version");
-
         while (reader.hasNext()) {
             int event = reader.next();
             if (event == XMLStreamConstants.END_ELEMENT) {
                 break;
             }
             if (event == XMLStreamConstants.START_ELEMENT) {
-                switch (reader.getLocalName()) {
+                String localName = reader.getLocalName();
+                LOGGER.fine("Reading element <" + localName + ">");
+                switch (localName) {
                     case "main-class" -> {
                         mainClass = reader.getAttributeValue(null, "name");
                         skipElement(reader);
@@ -102,7 +101,7 @@ public class ModuleXmlParser {
                         skipElement(reader);
                     }
                     default -> {
-                        LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <module>, skipping");
+                        LOGGER.fine("Unexpected element <" + localName + "> inside <module>, skipping");
                         skipElement(reader);
                     }
                 }
@@ -154,14 +153,17 @@ public class ModuleXmlParser {
                 break;
             }
             if (event == XMLStreamConstants.START_ELEMENT) {
+                LOGGER.fine("Reading resource element <" + reader.getLocalName() + ">");
                 switch (reader.getLocalName()) {
                     case "artifact" -> {
                         String name = reader.getAttributeValue(null, "name");
-                        resources.add(readArtifact(reader, name, null));
+                        LOGGER.fine("Reading resource artifact: " + name);
+                        resources.add(readArtifact(reader, name));
                     }
                     case "resource-root" -> {
                         String path = reader.getAttributeValue(null, "path");
-                        resources.add(readArtifact(reader, null, path));
+                        LOGGER.fine("Reading resource root: " + path);
+                        resources.add(readArtifact(reader, path));
                     }
                     default -> {
                         LOGGER.fine("Unexpected element <" + reader.getLocalName() + "> inside <resources>, skipping");
@@ -174,7 +176,7 @@ public class ModuleXmlParser {
         return resources;
     }
 
-    private Artifact readArtifact(XMLStreamReader reader, String name, String path) throws XMLStreamException {
+    private Artifact readArtifact(XMLStreamReader reader, String name) throws XMLStreamException {
         List<Filter> filters = new ArrayList<>();
         List<Condition> conditions = new ArrayList<>();
 
@@ -195,7 +197,9 @@ public class ModuleXmlParser {
             }
         }
 
-        return new Artifact(name, path, filters, conditions);
+        Artifact artifact = new Artifact(name, filters, conditions);
+        LOGGER.fine("Read resource artifact: " + artifact);
+        return artifact;
     }
 
     private List<Condition> readConditions(XMLStreamReader reader) throws XMLStreamException {
@@ -362,22 +366,6 @@ public class ModuleXmlParser {
                 if (depth == 0) {
                     return;
                 }
-            }
-        }
-    }
-
-    private void warnUnexpectedAttributes(XMLStreamReader reader, String elementName, String... expected) {
-        for (int i = 0; i < reader.getAttributeCount(); i++) {
-            String attrName = reader.getAttributeLocalName(i);
-            boolean isExpected = false;
-            for (String exp : expected) {
-                if (exp.equals(attrName)) {
-                    isExpected = true;
-                    break;
-                }
-            }
-            if (!isExpected) {
-                LOGGER.fine("Unexpected attribute '" + attrName + "' on <" + elementName + ">");
             }
         }
     }

@@ -27,14 +27,11 @@ import dev.tamboui.toolkit.element.RenderContext;
 import dev.tamboui.toolkit.element.Size;
 import dev.tamboui.toolkit.elements.ListElement;
 import dev.tamboui.toolkit.elements.Panel;
-import dev.tamboui.toolkit.event.EventResult;
 import dev.tamboui.tui.TuiConfig;
 import dev.tamboui.tui.bindings.ActionHandler;
 import dev.tamboui.tui.bindings.BindingSets;
 import dev.tamboui.tui.bindings.KeyTrigger;
 import dev.tamboui.tui.event.KeyCode;
-import dev.tamboui.tui.event.KeyEvent;
-import dev.tamboui.tui.event.MouseEvent;
 import dev.tamboui.widgets.table.Row;
 import dev.tamboui.widgets.tabs.TabsState;
 
@@ -65,33 +62,6 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
     public static void main(String[] args) throws Exception {
         // TODO: aesh
         new ModuleGraph().run(args[0]);
-    }
-
-    private static Panel footerPanel() {
-        var keys = new LinkedHashMap<String, String>();
-        keys.put("Up/Down", "Navigate");
-        keys.put("F1", "Resources Tab");
-        keys.put("F2", "Dependencies Tab");
-        keys.put("F3", "Dependents Tab");
-        keys.put("q", "Quit");
-        return panel(
-                () -> row(
-                        keys.entrySet().stream()
-                                .map(e -> text("[" + e.getKey() + "] " + e.getValue() + " "))
-                                .toArray(Element[]::new)
-                )
-        ).rounded().borderColor(Color.DARK_GRAY).length(3);
-    }
-
-    private static Panel generateTitlePanel() {
-        return panel(
-                text("JBoss Modules Analyzer")
-                        .bold()
-                        .cyan()
-        )
-                .rounded()
-                .borderColor(Color.CYAN)
-                .length(3);
     }
 
     public void run(String moduleDir) throws Exception {
@@ -134,7 +104,7 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
     @Override
     public void render(Frame frame, Rect area, RenderContext context) {
         column(
-                generateTitlePanel(),
+                titlePanel(),
                 row(
                         navigationPanel(),
                         infoPanel()
@@ -148,57 +118,63 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
         return Size.UNKNOWN;
     }
 
+    private Panel footerPanel() {
+        var keys = new LinkedHashMap<String, String>();
+        keys.put("Up/Down", "Navigate");
+        keys.put("F1", "Resources Tab");
+        keys.put("F2", "Dependencies Tab");
+        keys.put("F3", "Dependents Tab");
+        keys.put("q", "Quit");
+        return panel(
+                () -> row(
+                        keys.entrySet().stream()
+                                .map(e -> text("[" + e.getKey() + "] " + e.getValue() + " "))
+                                .toArray(Element[]::new)
+                )
+        ).rounded().borderColor(Color.DARK_GRAY).length(3);
+    }
+
+    private Panel titlePanel() {
+        return panel(
+                text("JBoss Modules Analyzer")
+                        .bold()
+                        .cyan()
+        )
+                .rounded()
+                .borderColor(Color.CYAN)
+                .length(3);
+    }
+
     private Panel navigationPanel() {
         return panel(listElement)
                 .title("JBoss Modules (" + modules.size() + " items)")
                 .rounded()
                 .borderColor(Color.WHITE)
-                .id("list-panel")
                 .focusable()
-//                .onKeyEvent(this::handleKey)
                 .constraint(Constraint.percentage(25));
-    }
-
-    private EventResult handleMouse(MouseEvent mouseEvent) {
-        logger.info(mouseEvent.toString());
-        return EventResult.UNHANDLED;
-    }
-
-    private EventResult handleKey1(KeyEvent event) {
-//        if (event.isUp()) {
-//            listElement.selectPrevious();
-//            return EventResult.HANDLED;
-//        }
-//        if (event.isDown()) {
-//            listElement.selectNext(1);
-//            return EventResult.HANDLED;
-//        }
-        return EventResult.UNHANDLED;
     }
 
     private Element infoPanel() {
         ModuleDefinition module = modules.get(listElement.selected());
-        var version = module.version().isBlank() ? "-" : module.version();
-        var mainClass = (module.mainClass() == null) ? "-" : module.mainClass();
 
         return column(
                 text("Module Information")
                         .bold()
                         .cyan(),
                 text("Module Name:    " + module.name()),
-                text("Module Version: " + version),
-                text("Main Class:     " + mainClass),
+                text("Module Version: " + (module.version().isBlank() ? "-" : module.version())),
+                text("Main Class:     " + ((module.mainClass() == null) ? "-" : module.mainClass())),
+                text("Module Alias:   " + ((module.alias() == null) ? "-" : module.alias())),
                 spacer(1),
                 tabs("Resources", "Dependencies", "Dependents")
                         .state(tabsState)
                         .focusable()
                         .id("tabs"),
-                renderTabPanel().fill()
+                renderTabPanel(module).fill()
         ).fill();
     }
 
-    private Panel renderTabPanel() {
-        ModuleDefinition module = modules.get(listElement.selected());
+    private Panel renderTabPanel(ModuleDefinition module) {
         var panel = switch (tabsState.selected()) {
             case 1 -> dependenciesPanel(module);
             case 2 -> dependentsPanel(module);
@@ -243,7 +219,8 @@ public class ModuleGraph implements Element { //extends ToolkitApp {
                 .scrollbarThumbColor(Color.CYAN);
         module.resources()
                 .stream().filter(artifact -> artifact.name() != null)
-                .forEach(dep -> listElement.add(dep.name()));
+                .forEach(dep ->
+                        listElement.add(dep.name()));
 
         return panel(listElement);
     }
