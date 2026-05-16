@@ -20,7 +20,7 @@ $ java -jar java -jar target/modulegraph-1.0-SNAPSHOT.jar /path/to/module/root
 You can also run the application via JBang[https://jbang.dev]:
 
 ```
-$ jbang https://github.com/jasondlee/ModuleGraph/blob/master/modulegraph.java
+$ jbang modulegraph@jasondlee/ModuleGraph
 ```
 
 The application should look something like this:
