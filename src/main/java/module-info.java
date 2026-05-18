@@ -7,4 +7,5 @@ module modulegraph {
 
     exports com.steeplesoft.modulegraph;
     exports com.steeplesoft.modulegraph.model;
+    exports com.steeplesoft.modulegraph.view;
 }
