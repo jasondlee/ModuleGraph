@@ -1,10 +1,10 @@
 package com.steeplesoft.modulegraph;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.logging.LogManager;
 
+import com.steeplesoft.modulegraph.view.ModuleGraphView;
 import dev.tamboui.toolkit.app.ToolkitRunner;
 import dev.tamboui.tui.TuiConfig;
 import dev.tamboui.tui.bindings.ActionHandler;

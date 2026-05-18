@@ -1,4 +1,4 @@
-package com.steeplesoft.modulegraph;
+package com.steeplesoft.modulegraph.view;
 
 import static dev.tamboui.toolkit.Toolkit.column;
 import static dev.tamboui.toolkit.Toolkit.list;
@@ -9,30 +9,21 @@ import static dev.tamboui.toolkit.Toolkit.table;
 import static dev.tamboui.toolkit.Toolkit.tabs;
 import static dev.tamboui.toolkit.Toolkit.text;
 
-import java.io.InputStream;
 import java.util.LinkedHashMap;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
+import com.steeplesoft.modulegraph.ModuleGraphController;
 import com.steeplesoft.modulegraph.model.ModuleDefinition;
 import dev.tamboui.layout.Constraint;
 import dev.tamboui.layout.Rect;
 import dev.tamboui.style.Color;
 import dev.tamboui.style.Style;
 import dev.tamboui.terminal.Frame;
-import dev.tamboui.toolkit.app.ToolkitRunner;
 import dev.tamboui.toolkit.element.Element;
 import dev.tamboui.toolkit.element.RenderContext;
 import dev.tamboui.toolkit.element.Size;
 import dev.tamboui.toolkit.elements.ListElement;
 import dev.tamboui.toolkit.elements.Panel;
-import dev.tamboui.tui.TuiConfig;
-import dev.tamboui.tui.bindings.ActionHandler;
-import dev.tamboui.tui.bindings.BindingSets;
-import dev.tamboui.tui.bindings.KeyTrigger;
-import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.widgets.table.Row;
-import dev.tamboui.widgets.tabs.TabsState;
 
 public class ModuleGraphView implements Element { //extends ToolkitApp {
     private final ListElement<?> listElement = list().highlightSymbol("> ")
@@ -88,10 +79,10 @@ public class ModuleGraphView implements Element { //extends ToolkitApp {
                 .constraint(Constraint.percentage(25));
     }
 
-    private Element infoPanel() {
+    private Panel infoPanel() {
         ModuleDefinition module = controller.getModuleList().get(listElement.selected());
 
-        return column(
+        return panel(
                 text("Module Information")
                         .bold()
                         .cyan(),
@@ -105,24 +96,41 @@ public class ModuleGraphView implements Element { //extends ToolkitApp {
                         .focusable()
                         .state(controller.getTabsState()),
                 renderTabPanel(module).fill()
-        ).fill();
-    }
-
-    private Panel renderTabPanel(ModuleDefinition module) {
-        var panel = switch (controller.getTabsState().selected()) {
-            case 1 -> dependenciesPanel(module);
-            case 2 -> dependentsPanel(module);
-            default -> resourcesPanel(module);
-        };
-
-        return panel
+        )
+                .id("info-panel")
                 .focusable()
                 .fill();
     }
 
-    private Panel dependenciesPanel(ModuleDefinition module) {
-        return panel(
-                table()
+    private Panel renderTabPanel(ModuleDefinition module) {
+        var child = switch (controller.getTabsState().selected()) {
+            case 0 -> resourcesPanel(module);
+            case 1 -> dependenciesPanel(module);
+            case 2 -> dependentsPanel(module);
+            default -> throw new IllegalArgumentException("Invalid tab index: " + controller.getTabsState().selected());
+        };
+
+        return panel(child)
+                .id("active-tab")
+                .focusable()
+                .fill();
+    }
+
+    private Element resourcesPanel(ModuleDefinition module) {
+        ListElement<?> listElement = list().highlightSymbol("> ")
+                .highlightColor(Color.YELLOW)
+                .autoScroll()
+                .scrollbar()
+                .scrollbarThumbColor(Color.CYAN);
+        module.resources().stream()
+                .filter(artifact -> artifact.name() != null)
+                .forEach(dep -> listElement.add(dep.name()));
+
+        return listElement;
+    }
+
+    private Element dependenciesPanel(ModuleDefinition module) {
+        return table()
                         .header(Row.from("Module Name", "Export", "Services", "Optional"))
                         .rows(
                                 module.dependencies().stream()
@@ -145,26 +153,10 @@ public class ModuleGraphView implements Element { //extends ToolkitApp {
                         .title("Module Information")
                         .id("table")
                         .focusable()
-                        .borderColor(Color.GRAY)
-        )
-                .id("dependencies-panel");
+                        .borderColor(Color.GRAY);
     }
 
-    private Panel resourcesPanel(ModuleDefinition module) {
-        ListElement<?> listElement = list()
-                .autoScroll()
-                .scrollbar()
-                .scrollbarThumbColor(Color.CYAN);
-        module.resources()
-                .stream().filter(artifact -> artifact.name() != null)
-                .forEach(dep ->
-                        listElement.add(dep.name()));
-
-        return panel(listElement)
-                .id("resources-panel");
-    }
-
-    private Panel dependentsPanel(ModuleDefinition module) {
+    private Element dependentsPanel(ModuleDefinition module) {
         ListElement<?> listElement = list()
                 .autoScroll()
                 .scrollbar()
@@ -176,8 +168,7 @@ public class ModuleGraphView implements Element { //extends ToolkitApp {
                 .toList()
                 .forEach(listElement::add);
 
-        return panel(listElement)
-                .id("dependents-panel");
+        return listElement;
     }
 
     private Panel footerPanel() {
