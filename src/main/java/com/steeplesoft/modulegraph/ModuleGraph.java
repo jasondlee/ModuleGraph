@@ -18,6 +18,11 @@ public class ModuleGraph {
             LogManager.getLogManager().readConfiguration(is);
         }
 
+        if (args.length == 0) {
+            System.err.println("Please provide a JBoss Modules directory");
+            System.exit(1);
+        }
+
         var controller = new ModuleGraphController(args[0]);
         var view = new ModuleGraphView(controller);
 

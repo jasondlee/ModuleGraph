@@ -68,17 +68,15 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- For Toolkit DSL (recommended) -->
         <dependency>
             <groupId>dev.tamboui</groupId>
             <artifactId>tamboui-toolkit</artifactId>
         </dependency>
-
-        <!-- JLine backend (one backend is required) -->
         <dependency>
             <groupId>dev.tamboui</groupId>
-            <artifactId>tamboui-jline3-backend</artifactId>
+            <artifactId>tamboui-panama-backend</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -110,7 +108,7 @@
                                     <version>3.9</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>${jdk.min.version}</version>
+                                    <version>${maven.compiler.release}</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
