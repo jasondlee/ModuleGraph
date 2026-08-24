@@ -8,27 +8,11 @@
     <artifactId>modulegraph</artifactId>
     <version>0.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <name>Module Graph</name>
     <description>A TUI tool for visualizing WildFly/JBoss module dependency graphs</description>
     <url>https://github.com/jasondlee/ModuleGraph</url>
     <inceptionYear>2026</inceptionYear>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <maven.compiler.release>21</maven.compiler.release>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-
-        <jdk.min.version>${maven.compiler.release}</jdk.min.version>
-
-        <version.jgrapht>1.5.2</version.jgrapht>
-        <version.junit>6.0.3</version.junit>
-        <version.tamboui>0.3.0</version.tamboui>
-
-        <main.class>com.steeplesoft.modulegraph.ModuleGraph</main.class>
-        <app.distribution.directory>${project.build.directory}/distributions/app</app.distribution.directory>
-    </properties>
 
     <licenses>
         <license>
@@ -38,6 +22,18 @@
         </license>
     </licenses>
 
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <version.jgrapht>1.5.2</version.jgrapht>
+        <version.junit>6.0.3</version.junit>
+        <version.tamboui>0.4.0</version.tamboui>
+
+        <mainClass>com.steeplesoft.modulegraph.ModuleGraph</mainClass>
+        <scm.connection>git@github.com:jasondlee/ModuleGraph.git</scm.connection>
+    </properties>
+
     <developers>
         <developer>
             <id>jasondlee</id>
@@ -46,9 +42,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/jasondlee/ModuleGraph.git</connection>
-        <developerConnection>scm:git:ssh://github.com:jasondlee/ModuleGraph.git</developerConnection>
+        <connection>scm:git:${scm.connection}</connection>
+        <developerConnection>scm:git:${scm.connection}</developerConnection>
         <url>https://github.com/jasondlee/ModuleGraph/tree/master</url>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
@@ -96,84 +93,11 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.5.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.15.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.4</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.5</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.4</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.5.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.5.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.2.7</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.21.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.5</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.6.3</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
@@ -193,14 +117,14 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.5.1</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>${main.class}</mainClass>
+                            <mainClass>${mainClass}</mainClass>
                             <addClasspath>true</addClasspath>
                         </manifest>
                     </archive>
@@ -210,47 +134,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>${main.class}</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jreleaser</groupId>
-                <artifactId>jreleaser-maven-plugin</artifactId>
-                <version>1.24.0</version>
-                <inherited>false</inherited>
-                <configuration>
-                    <jreleaser>
-                        <project>
-                            <java>
-                                <mainClass>${main.class}</mainClass>
-                            </java>
-                        </project>
-                        <release>
-                            <github>
-                                <owner>jasondlee</owner>
-                                <overwrite>true</overwrite>
-                            </github>
-                        </release>
-                        <signing>
-                            <pgp>
-                                <active>ALWAYS</active>
-                                <armored>true</armored>
-                            </pgp>
-                        </signing>
-                        <deploy>
-                            <maven>
-                                <mavenCentral>
-                                    <sonatype>
-                                        <active>RELEASE</active>
-                                        <url>https://central.sonatype.com/api/v1/publisher</url>
-                                        <stagingRepositories>target/staging-deploy</stagingRepositories>
-                                        <username>${env.JRELEASER_DEPLOY_MAVEN_MAVENCENTRAL_SONATYPE_USERNAME}</username>
-                                        <password>${env.JRELEASER_DEPLOY_MAVEN_MAVENCENTRAL_SONATYPE_PASSWORD}</password>
-                                    </sonatype>
-                                </mavenCentral>
-                            </maven>
-                        </deploy>
-                    </jreleaser>
+                    <mainClass>${mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -263,11 +147,11 @@
                 <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
             </properties>
             <build>
-                <defaultGoal>deploy</defaultGoal>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
+                        <version>3.4.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -281,6 +165,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.12.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -292,17 +177,78 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
+                        <groupId>org.jreleaser</groupId>
+                        <artifactId>jreleaser-maven-plugin</artifactId>
+                        <version>1.25.0</version>
+                        <inherited>false</inherited>
                         <executions>
                             <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
+                                <id>release</id>
+                                <phase>deploy</phase>
                                 <goals>
-                                    <goal>sign</goal>
+                                    <goal>full-release</goal>
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <jreleaser>
+                                <project>
+                                    <inceptionYear>2026</inceptionYear>
+                                    <languages>
+                                        <java>
+                                            <mainClass>${mainClass}</mainClass>
+                                        </java>
+                                    </languages>
+                                </project>
+                                <release>
+                                    <github>
+                                        <owner>jasondlee</owner>
+                                        <overwrite>true</overwrite>
+                                        <branch>master</branch>
+                                        <changelog>
+                                            <formatted>ALWAYS</formatted>
+                                            <preset>conventional-commits</preset>
+                                            <contributors>
+                                                <enabled>false</enabled>
+                                            </contributors>
+                                        </changelog>
+                                    </github>
+                                </release>
+                                <distributions>
+                                    <modulegraph>
+                                        <type>SINGLE_JAR</type>
+                                        <artifacts>
+                                            <artifact>
+                                                <path>${project.build.directory}/${project.build.finalName}.jar</path>
+                                            </artifact>
+                                        </artifacts>
+                                        <jbang>
+                                            <active>ALWAYS</active>
+                                        </jbang>
+                                    </modulegraph>
+                                </distributions>
+                                <signing>
+                                    <pgp>
+                                        <active>ALWAYS</active>
+                                        <armored>true</armored>
+                                    </pgp>
+                                </signing>
+                                <deploy>
+                                    <maven>
+                                        <mavenCentral>
+                                            <sonatype>
+                                                <active>ALWAYS</active>
+                                                <url>https://central.sonatype.com/api/v1/publisher</url>
+                                                <stage>UPLOAD</stage>
+                                                <stagingRepositories>
+                                                    ${project.build.directory}/staging-deploy
+                                                </stagingRepositories>
+                                            </sonatype>
+                                        </mavenCentral>
+                                    </maven>
+                                </deploy>
+                            </jreleaser>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
